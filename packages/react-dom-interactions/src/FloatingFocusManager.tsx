@@ -10,6 +10,7 @@ import {getTarget} from './utils/getTarget';
 import {isElement, isHTMLElement} from './utils/is';
 import {isTypeableElement, TYPEABLE_SELECTOR} from './utils/isTypeableElement';
 import {stopEvent} from './utils/stopEvent';
+import {untabbableOutside} from './utils/untabbable';
 import {useLatestRef} from './utils/useLatestRef';
 
 function focus(el: HTMLElement | undefined, preventScroll = false) {
@@ -20,34 +21,10 @@ function focus(el: HTMLElement | undefined, preventScroll = false) {
   });
 }
 
-const SELECTOR =
+export const SELECTOR =
   'select:not([disabled]),a[href],button:not([disabled]),[tabindex],' +
   'iframe,object,embed,area[href],audio[controls],video[controls],' +
   TYPEABLE_SELECTOR;
-
-function untabbableOutside(element: HTMLElement) {
-  const allElements = getDocument(element).querySelectorAll(SELECTOR);
-  const outsideElements = Array.from(allElements)
-    .filter((node) => !element.contains(node))
-    .map((node) => ({
-      node,
-      tabIndex: node.getAttribute('tabindex'),
-    }));
-
-  outsideElements.forEach(({node}) => {
-    node.setAttribute('tabindex', '-1');
-  });
-
-  return () => {
-    outsideElements.forEach(({node, tabIndex}) => {
-      if (tabIndex) {
-        node.setAttribute('tabindex', tabIndex);
-      } else {
-        node.removeAttribute('tabindex');
-      }
-    });
-  };
-}
 
 const FocusGuard = React.forwardRef<
   HTMLSpanElement,
