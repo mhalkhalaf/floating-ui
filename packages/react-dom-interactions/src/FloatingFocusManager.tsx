@@ -305,10 +305,10 @@ export function FloatingFocusManager<RT extends ReferenceType = ReferenceType>({
   }, [getTabbableElements, initialFocus, returnFocus, refs, events]);
 
   React.useEffect(() => {
-    if (!guards && refs.floating.current) {
+    if (!guards && modal && refs.floating.current) {
       return untabbableOutside(refs.floating.current);
     }
-  }, [guards, refs]);
+  }, [guards, modal, refs]);
 
   const isTypeableCombobox = () =>
     refs.domReference.current?.getAttribute('role') === 'combobox' &&
