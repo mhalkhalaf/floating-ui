@@ -25,6 +25,30 @@ const SELECTOR =
   'iframe,object,embed,area[href],audio[controls],video[controls],' +
   TYPEABLE_SELECTOR;
 
+function untabbableOutside(element: HTMLElement) {
+  const allElements = getDocument(element).querySelectorAll(SELECTOR);
+  const outsideElements = Array.from(allElements)
+    .filter((node) => !element.contains(node))
+    .map((node) => ({
+      node,
+      tabIndex: node.getAttribute('tabindex'),
+    }));
+
+  outsideElements.forEach(({node}) => {
+    node.setAttribute('tabindex', '-1');
+  });
+
+  return () => {
+    outsideElements.forEach(({node, tabIndex}) => {
+      if (tabIndex) {
+        node.setAttribute('tabindex', tabIndex);
+      } else {
+        node.removeAttribute('tabindex');
+      }
+    });
+  };
+}
+
 const FocusGuard = React.forwardRef<
   HTMLSpanElement,
   React.HTMLProps<HTMLSpanElement>
@@ -49,7 +73,7 @@ export interface Props<RT extends ReferenceType = ReferenceType> {
   children: JSX.Element;
   order?: Array<'reference' | 'floating' | 'content'>;
   initialFocus?: number | React.MutableRefObject<HTMLElement | null>;
-  endGuard?: boolean;
+  guards?: boolean;
   returnFocus?: boolean;
   modal?: boolean;
 }
@@ -62,7 +86,7 @@ export function FloatingFocusManager<RT extends ReferenceType = ReferenceType>({
   context: {refs, nodeId, onOpenChange, dataRef, events},
   children,
   order = ['content'],
-  endGuard = true,
+  guards = true,
   initialFocus = 0,
   returnFocus = true,
   modal = true,
@@ -280,13 +304,19 @@ export function FloatingFocusManager<RT extends ReferenceType = ReferenceType>({
     };
   }, [getTabbableElements, initialFocus, returnFocus, refs, events]);
 
+  React.useEffect(() => {
+    if (!guards && refs.floating.current) {
+      return untabbableOutside(refs.floating.current);
+    }
+  }, [guards, refs]);
+
   const isTypeableCombobox = () =>
     refs.domReference.current?.getAttribute('role') === 'combobox' &&
     isTypeableElement(refs.domReference.current);
 
   return (
     <>
-      {modal && (
+      {modal && guards && (
         <FocusGuard
           onFocus={(event) => {
             if (isTypeableCombobox()) {
@@ -307,7 +337,7 @@ export function FloatingFocusManager<RT extends ReferenceType = ReferenceType>({
         children,
         order.includes('floating') ? {tabIndex: 0} : {}
       )}
-      {modal && endGuard && (
+      {modal && guards && (
         <FocusGuard
           onFocus={(event) => {
             if (isTypeableCombobox()) {
