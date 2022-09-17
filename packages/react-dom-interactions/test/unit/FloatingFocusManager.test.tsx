@@ -196,9 +196,9 @@ describe('returnFocus', () => {
   });
 });
 
-describe('endGuard', () => {
+describe('guards', () => {
   test('true', async () => {
-    render(<App endGuard={true} />);
+    render(<App guards />);
 
     fireEvent.click(screen.getByTestId('reference'));
 
@@ -210,7 +210,7 @@ describe('endGuard', () => {
   });
 
   test('false', async () => {
-    render(<App endGuard={false} />);
+    render(<App guards={false} />);
 
     fireEvent.click(screen.getByTestId('reference'));
 
