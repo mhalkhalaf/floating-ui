@@ -222,32 +222,6 @@ describe('guards', () => {
   });
 });
 
-describe('endGuard', () => {
-  test('true', async () => {
-    render(<App endGuard={true} />);
-
-    fireEvent.click(screen.getByTestId('reference'));
-
-    await userEvent.tab();
-    await userEvent.tab();
-    await userEvent.tab();
-
-    expect(document.body).not.toHaveFocus();
-  });
-
-  test('false', async () => {
-    render(<App endGuard={false} />);
-
-    fireEvent.click(screen.getByTestId('reference'));
-
-    await userEvent.tab();
-    await userEvent.tab();
-    await userEvent.tab();
-
-    expect(document.body).toHaveFocus();
-  });
-});
-
 describe('modal', () => {
   test('true', async () => {
     render(<App modal={true} />);
